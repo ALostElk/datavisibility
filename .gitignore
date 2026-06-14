@@ -1,0 +1,26 @@
+# 参考模板（不公开，仅本地参考）
+参考模板/
+
+# 原始/全量数据（>100MB，超出 GitHub 限制，请按 README 从 HuggingFace 下载）
+data/*.parquet
+data/raw/
+data/interim/
+data/processed/
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 交互式大文件（可本地生成）
+output/interactive/*.html

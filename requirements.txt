@@ -1,0 +1,23 @@
+# 数据处理
+pandas>=2.2
+numpy>=1.26
+pyarrow>=15.0
+
+# 数据获取（HuggingFace）
+datasets>=2.18
+huggingface_hub>=0.23
+
+# 建模：聚类 / 情感分类 / LDA / STL
+scikit-learn>=1.4
+statsmodels>=0.14
+
+# 可视化
+matplotlib>=3.9
+seaborn>=0.13
+plotly>=5.24
+pyecharts>=2.0
+wordcloud>=1.9
+networkx>=3.3
+
+# PDF 文本抽取（分析参考项目，可选）
+PyMuPDF>=1.24
