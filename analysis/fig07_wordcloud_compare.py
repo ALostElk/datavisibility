@@ -89,7 +89,7 @@ def main() -> str:
 
     fig.suptitle("评论里的判别词：倒闭店 vs 存活店", fontsize=16, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig11_wordcloud_compare.png"
+    out = config.FIG_DIR / "fig07_wordcloud_compare.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

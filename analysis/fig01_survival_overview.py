@@ -80,7 +80,7 @@ def main() -> str:
     fig.suptitle("存活全景：大市场竞争更激烈、低人气店更易倒闭",
                  fontsize=16, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig14_survival_overview.png"
+    out = config.FIG_DIR / "fig01_survival_overview.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

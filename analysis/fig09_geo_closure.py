@@ -53,7 +53,7 @@ def main() -> str:
         geo=dict(lakecolor="white"), margin=dict(l=10, r=10, t=60, b=10),
     )
 
-    html = config.INTERACTIVE_DIR / "fig04_geo_closure.html"
+    html = config.INTERACTIVE_DIR / "fig09_geo_closure.html"
     fig.write_html(str(html))
     print("saved html:", html)
 
@@ -111,7 +111,7 @@ def _static_panels(agg, df) -> str:
 
     fig.suptitle("倒闭率的地理格局与市场饱和度", fontsize=16, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig04_geo_closure_bar.png"
+    out = config.FIG_DIR / "fig09_geo_closure_bar.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved png:", out)

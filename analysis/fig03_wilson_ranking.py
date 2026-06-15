@@ -1,4 +1,4 @@
-"""核心图 4.1.4：Wilson Score 置信排名——「真实口碑」比裸均分更能区分生死。
+"""核心图 4.1.3：Wilson Score 置信排名——「真实口碑」比裸均分更能区分生死。
 
 小样本店的好评率天然虚高（5 条全好评 = 100%），Wilson 置信下界对样本量做
 收缩惩罚，给出更稳健的"真实口碑"。本图：
@@ -94,7 +94,7 @@ def main() -> str:
     fig.suptitle("真实口碑（Wilson 置信下界）比裸均分更能区分餐厅生死",
                  fontsize=16, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig07_wilson_ranking.png"
+    out = config.FIG_DIR / "fig03_wilson_ranking.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

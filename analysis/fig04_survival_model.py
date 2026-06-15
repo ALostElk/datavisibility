@@ -1,4 +1,4 @@
-"""核心图 4.1.6：可解释的存活预测——逻辑回归输出「风险/续命因子」。
+"""核心图 4.1.4：可解释的存活预测——逻辑回归输出「风险/续命因子」。
 
 仅用商户结构化特征（星级、评论规模、价格档、便利性属性）做标准化后逻辑回归，
 预测 `is_open`。系数即可解释的因子方向与强度：正=利于存活，负=倒闭风险。
@@ -113,7 +113,7 @@ def main() -> str:
 
     fig.suptitle("用结构化特征可解释地预测餐厅存活：评论规模与星级是最强续命因子",
                  fontsize=15, fontweight="bold")
-    out = config.FIG_DIR / "fig09_survival_model.png"
+    out = config.FIG_DIR / "fig04_survival_model.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
     print("saved:", out)

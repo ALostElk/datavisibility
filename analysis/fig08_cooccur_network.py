@@ -1,4 +1,4 @@
-"""核心图 4.3.4（加分项）：差评投诉词共现网络——死亡信号如何抱团。
+"""核心图 4.3.2（加分项）：差评投诉词共现网络——死亡信号如何抱团。
 
 聚焦低分评论（≤2★），围绕一组与就餐体验相关的投诉词，统计它们在同一条评论中
 的共现（Jaccard），用 networkx 弹簧布局成网络：节点大小∝词频，边宽∝共现强度，
@@ -115,7 +115,7 @@ def main() -> str:
     ax.set_title("差评投诉词共现网络：投诉信号抱团成「出品·价格 / 服务态度 / 等待速度」几类死亡主题",
                  fontsize=13.5, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig12_cooccur_network.png"
+    out = config.FIG_DIR / "fig08_cooccur_network.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

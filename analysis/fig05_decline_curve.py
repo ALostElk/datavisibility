@@ -1,4 +1,4 @@
-"""核心图 4.2.3：关门前的"评论衰退曲线"。
+"""核心图 4.2.1：关门前的"评论衰退曲线"。
 
 把每家店的时间轴对齐到"最后一条评论"（倒闭店≈关门时点），回看 24 个月，
 对比【倒闭】与【营业】两个队列的：
@@ -87,7 +87,7 @@ def main() -> str:
     fig.suptitle("关门前的衰退曲线：评论停更 + 评分滑坡 是最强预警信号",
                  fontsize=16, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig02_decline_curve.png"
+    out = config.FIG_DIR / "fig05_decline_curve.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

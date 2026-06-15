@@ -70,7 +70,7 @@ def main() -> str:
     fig.suptitle("高分为什么也会倒闭？——星级几乎无法区分餐厅生死",
                  fontsize=16, fontweight="bold")
     fig.tight_layout()
-    out = config.FIG_DIR / "fig01_stars_vs_survival.png"
+    out = config.FIG_DIR / "fig02_stars_vs_survival.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

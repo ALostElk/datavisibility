@@ -1,4 +1,4 @@
-"""核心图 4.2.4：口碑衰退「预警指标卡」——把衰退曲线提炼成可操作阈值。
+"""核心图 4.2.2：口碑衰退「预警指标卡」——把衰退曲线提炼成可操作阈值。
 
 由评论序列为每家店派生 4 个可观测预警指标，对比倒闭 vs 营业店的分布（提琴图），
 并标注建议阈值与"倒闭店命中率"，构成项目最终落地的预警指标卡：
@@ -103,7 +103,7 @@ def main() -> str:
     fig.suptitle("口碑衰退预警指标卡：「停更·降速」是强信号，「评分·差评」几乎无差异（再证星级失效）",
                  fontsize=15, fontweight="bold")
     fig.tight_layout(rect=(0, 0, 1, 0.97))
-    out = config.FIG_DIR / "fig15_warning_card.png"
+    out = config.FIG_DIR / "fig06_warning_card.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)

@@ -99,7 +99,7 @@ def main() -> str:
     fig.suptitle("可视化评估与叙事：同一组「菜系倒闭率」的改进前 / 改进后对照",
                  fontsize=15, fontweight="bold")
     fig.tight_layout(rect=(0, 0.06, 1, 1))
-    out = config.FIG_DIR / "fig13_tufte_redesign.png"
+    out = config.FIG_DIR / "fig10_tufte_redesign.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)
