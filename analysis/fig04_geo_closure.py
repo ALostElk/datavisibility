@@ -57,35 +57,65 @@ def main() -> str:
     fig.write_html(str(html))
     print("saved html:", html)
 
-    # 静态报告图：各州倒闭率排序条形（避开 kaleido 在 Windows 的挂起问题）
-    png = _static_bar(agg)
+    # 静态报告图：各州倒闭率 + 城市竞争密度散点（避开 kaleido 在 Windows 的挂起）
+    png = _static_panels(agg, df)
 
     top = agg.sort_values("closure_rate", ascending=False).head(5)
     print("倒闭率最高的州:\n", top[["state", "closure_rate", "n"]].to_string(index=False))
     return str(png)
 
 
-def _static_bar(agg) -> str:
+MIN_CITY = 40
+
+
+def _static_panels(agg, df) -> str:
+    import numpy as np
     theme.apply()
+
+    fig, (ax, ax2) = plt.subplots(
+        1, 2, figsize=(14, 6.4), gridspec_kw={"width_ratios": [1, 1.15]})
+
+    # 左：各州倒闭率排序条形
     d = agg.sort_values("closure_rate")
     overall = d["closure_rate"].mean()
-    fig, ax = plt.subplots(figsize=(7.5, max(5, len(d) * 0.33)))
     norm = plt.Normalize(d["closure_rate"].min(), d["closure_rate"].max())
     colors = plt.cm.Reds(norm(d["closure_rate"]))
     ax.barh(d["state"], d["closure_rate"], color=colors)
     ax.axvline(overall, color="#333", ls="--", lw=1,
                label=f"各州均值 {overall:.1f}%")
     for y, (st, v, n) in enumerate(d[["state", "closure_rate", "n"]].values):
-        ax.text(v + 0.3, y, f"{v:.0f}%", va="center", fontsize=8)
+        ax.text(v + 0.3, y, f"{v:.0f}%", va="center", fontsize=7.5)
     ax.set_xlabel("倒闭率 (%)")
-    ax.set_title("美国各州餐厅倒闭率（按高低排序）", fontweight="bold")
+    ax.set_title("各州餐厅倒闭率（按高低排序）")
     ax.legend(frameon=False, loc="lower right")
     ax.set_xlim(0, d["closure_rate"].max() * 1.12)
+
+    # 右：竞争密度——城市餐厅数 vs 倒闭率（市场饱和度，RQ5）
+    city = df.groupby("city").agg(
+        n=("business_id", "size"),
+        closure=("is_open", lambda s: (1 - s.mean()) * 100)).reset_index()
+    city = city[city["n"] >= MIN_CITY]
+    x = np.log10(city["n"])
+    ax2.scatter(x, city["closure"], s=18 + city["n"] / 30, alpha=0.5,
+                color="#5b7fa6", edgecolors="none")
+    # 趋势线
+    coef = np.polyfit(x, city["closure"], 1)
+    xx = np.linspace(x.min(), x.max(), 50)
+    ax2.plot(xx, np.polyval(coef, xx), color=theme.CLOSED_COLOR, lw=2,
+             label=f"趋势：每 ×10 餐厅数，倒闭率 {coef[0]:+.1f}pp")
+    r = np.corrcoef(x, city["closure"])[0, 1]
+    ax2.set_xlabel("城市餐厅数（log10，竞争密度代理）")
+    ax2.set_ylabel("城市倒闭率 (%)")
+    ax2.set_title(f"竞争越密集，倒闭率越高（r={r:.2f}）")
+    ax2.legend(frameon=False, loc="upper left")
+
+    fig.suptitle("倒闭率的地理格局与市场饱和度", fontsize=16, fontweight="bold")
     fig.tight_layout()
     out = config.FIG_DIR / "fig04_geo_closure_bar.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved png:", out)
+    print(f"城市数 {len(city)}  竞争密度-倒闭率 r={r:.3f}")
     return str(out)
 
 

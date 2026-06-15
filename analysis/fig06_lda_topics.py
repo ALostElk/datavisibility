@@ -1,8 +1,10 @@
-"""核心图 4.3.2：LDA 主题建模——顾客在谈论什么，哪些主题驱动差评。
+"""核心图 4.3.2：LDA 主题——倒闭店 vs 存活店在「谈论什么」上的系统差异。
 
-对采样评论做 LDA，得到若干主题；按"主题主导评论的平均星级"排序，
-红色低分=投诉主题，绿色高分=好评主题。每行标注主题关键词与占比。
-对应课程 L7 文本数据可视化。
+对采样评论做 LDA 得到若干主题，按"主导评论"统计每个主题在【倒闭店】与【存活店】
+评论中的占比，画发散棒棒糖：
+  右(红)=该主题在倒闭店评论中占比更高（潜在死亡主题，如 service/wait）
+  左(绿)=在存活店中更突出（好评主题）
+每行标注主题关键词。对应课程 L7（文本主题可视化）。
 """
 
 from __future__ import annotations
@@ -18,8 +20,8 @@ from analysis import dataio, theme
 from src import config
 
 N_TOPICS = 8
-N_DOCS = 50_000
-TOPN_WORDS = 8
+N_DOCS = 60_000
+TOPN_WORDS = 7
 
 
 def main() -> str:
@@ -30,6 +32,7 @@ def main() -> str:
     from sklearn.feature_extraction.text import CountVectorizer
 
     df = dataio.sample_reviews_text(n_per_class=N_DOCS // 2).reset_index(drop=True)
+    df["is_open"] = df["is_open"].astype(int)
     print("LDA 文档数:", len(df))
 
     vec = CountVectorizer(max_features=4000, stop_words="english",
@@ -44,38 +47,46 @@ def main() -> str:
     keywords = {k: ", ".join(names[comp.argsort()[-TOPN_WORDS:][::-1]])
                 for k, comp in enumerate(lda.components_)}
 
-    dom = doc_topic.argmax(axis=1)
-    df["topic"] = dom
-    stats = df.groupby("topic").agg(
-        avg_stars=("stars_y", "mean"), n=("text", "size")).reset_index()
-    stats["share"] = stats["n"] / len(df)
-    stats = stats.sort_values("avg_stars")
+    df["topic"] = doc_topic.argmax(axis=1)
+    df["avg_stars"] = df["stars_y"]
+    # 各主题在倒闭/存活店评论中的占比
+    share = (df.groupby(["is_open", "topic"]).size()
+             / df.groupby("is_open").size()).unstack(0)
+    share.columns = ["closed", "open"]
+    share["diff"] = (share["closed"] - share["open"]) * 100   # 百分点
+    stars = df.groupby("topic")["stars_y"].mean()
+    share = share.sort_values("diff")
 
-    fig, ax = plt.subplots(figsize=(13, 6.5))
-    norm = plt.Normalize(1, 5)
-    cmap = plt.cm.RdYlGn
-    y = np.arange(len(stats))
-    bars = ax.barh(y, stats["avg_stars"], color=cmap(norm(stats["avg_stars"])),
+    fig, ax = plt.subplots(figsize=(13, 6.6))
+    y = np.arange(len(share))
+    for yi, (tid, row) in zip(y, share.iterrows()):
+        color = theme.CLOSED_COLOR if row["diff"] > 0 else theme.OPEN_COLOR
+        ax.plot([0, row["diff"]], [yi, yi], color=color, lw=2.5, zorder=1)
+        ax.scatter(row["diff"], yi, s=120, color=color, zorder=2,
                    edgecolor="white")
+        ha = "left" if row["diff"] > 0 else "right"
+        off = 0.05 if row["diff"] > 0 else -0.05
+        ax.text(row["diff"] + off, yi,
+                f"{keywords[tid]}  (均分{stars[tid]:.1f})",
+                va="center", ha=ha, fontsize=8.5, color="#222")
+    ax.axvline(0, color="#333", lw=0.9)
     ax.set_yticks(y)
-    ax.set_yticklabels([f"主题{int(t)}" for t in stats["topic"]])
-    ax.set_xlim(1, 5.4)
-    ax.set_xlabel("该主题主导评论的平均星级（越低越是投诉主题）")
-    ax.set_title("顾客在谈论什么：LDA 主题与其情感倾向", fontweight="bold")
-    ax.axvline(df["stars_y"].mean(), color="#333", ls="--", lw=1,
-               label=f"总体均分 {df['stars_y'].mean():.2f}")
-    for yi, row in zip(y, stats.itertuples()):
-        ax.text(row.avg_stars + 0.04, yi,
-                f"{keywords[row.topic]}  ·  占比{row.share:.0%}",
-                va="center", fontsize=8.5, color="#222")
-    ax.legend(frameon=False, loc="lower right")
+    ax.set_yticklabels([f"主题{int(t)}" for t in share.index])
+    mx = max(abs(share["diff"])) * 2.4
+    ax.set_xlim(-mx, mx)
+    ax.set_xlabel("主题占比差（倒闭店 − 存活店，百分点）  ←存活更多 | 倒闭更多→")
+    ax.set_title("倒闭店 vs 存活店：评论主题占比差异（红=死亡主题）",
+                 fontweight="bold")
+    ax.text(0.99, 0.02, "红点偏右=倒闭店更常谈及", transform=ax.transAxes,
+            ha="right", color=theme.CLOSED_COLOR, fontsize=9)
+
     fig.tight_layout()
     out = config.FIG_DIR / "fig06_lda_topics.png"
     fig.savefig(out)
     plt.close(fig)
     print("saved:", out)
-    for row in stats.itertuples():
-        print(f"  主题{row.topic} 均分{row.avg_stars:.2f} 占比{row.share:.0%}: {keywords[row.topic]}")
+    for tid, row in share.iterrows():
+        print(f"  主题{tid} 差{row['diff']:+.1f}pp 均分{stars[tid]:.2f}: {keywords[tid]}")
     return str(out)
 
 

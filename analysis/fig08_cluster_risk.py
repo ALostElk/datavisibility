@@ -76,24 +76,24 @@ def main() -> str:
               framealpha=0.85, edgecolor="none", labelspacing=0.3,
               handletextpad=0.3, borderpad=0.3)
 
-    # 中：簇画像热力图（标准化中心，按存活率排序）
-    ax2 = fig.add_subplot(gs[1])
-    centers = km.cluster_centers_[order]
-    im = ax2.imshow(centers.T, cmap="RdBu_r", aspect="auto",
-                    vmin=-np.abs(centers).max(), vmax=np.abs(centers).max())
-    ax2.set_xticks(range(K))
-    ax2.set_xticklabels([f"群{c}" for c in order])
-    ax2.set_yticks(range(len(FEATURES)))
-    ax2.set_yticklabels([lab for _, lab in FEATURES])
-    ax2.set_title("各群特征画像（标准化，红高蓝低）")
-    vmax = np.abs(centers).max()
-    for i in range(K):
-        for j in range(len(FEATURES)):
-            v = centers[i, j]
-            txt_color = "white" if abs(v) > 0.6 * vmax else "#222"
-            ax2.text(i, j, f"{v:+.1f}", ha="center", va="center",
-                     fontsize=7.5, color=txt_color)
-    fig.colorbar(im, ax=ax2, fraction=0.046, pad=0.04)
+    # 中：雷达图对比"最高危"与"最稳健"两群的标准化画像
+    ax2 = fig.add_subplot(gs[1], polar=True)
+    feat_labels = [lab for _, lab in FEATURES]
+    ang = np.linspace(0, 2 * np.pi, len(feat_labels), endpoint=False)
+    ang = np.concatenate([ang, ang[:1]])
+    risky, robust = order[0], order[-1]      # 最低 / 最高存活
+    for cl, name, color in [(risky, f"最高危群{risky}", theme.CLOSED_COLOR),
+                            (robust, f"最稳健群{robust}", theme.OPEN_COLOR)]:
+        vals = km.cluster_centers_[cl]
+        vals = np.concatenate([vals, vals[:1]])
+        ax2.plot(ang, vals, color=color, lw=2.2, label=f"{name}（存活{surv[cl]:.0%}）")
+        ax2.fill(ang, vals, color=color, alpha=0.18)
+    ax2.set_xticks(ang[:-1])
+    ax2.set_xticklabels(feat_labels, fontsize=8)
+    ax2.set_yticklabels([])
+    ax2.set_title("高危 vs 稳健群画像（标准化雷达）", pad=18)
+    ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.08),
+               frameon=False, fontsize=8, ncol=1)
 
     # 右：各群存活率条形（高危在上）
     ax3 = fig.add_subplot(gs[2])
@@ -113,8 +113,9 @@ def main() -> str:
     ax3.set_xlim(0, max(vals) * 1.18)
     ax3.legend(frameon=False, loc="lower right", fontsize=8)
 
-    fig.suptitle("KMeans 高危画像：低星级 + 评论稀少 + 缺便利性属性的群体最易倒闭",
-                 fontsize=15, fontweight="bold")
+    fig.suptitle("KMeans 商户分群：存活率 59%→77% 梯度显著——主打外卖/配送的群更稳健，"
+                 "高价·靠预订的正餐群更高危",
+                 fontsize=13.5, fontweight="bold")
     out = config.FIG_DIR / "fig08_cluster_risk.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)

@@ -18,6 +18,8 @@ plotly>=5.24
 pyecharts>=2.0
 wordcloud>=1.9
 networkx>=3.3
+squarify>=0.4
+squarify>=0.4
 
 # PDF 文本抽取（分析参考项目，可选）
 PyMuPDF>=1.24
